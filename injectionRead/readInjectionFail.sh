@@ -14,11 +14,11 @@ mkdir -p tmpmnt
 FAILTYPE=fail_function
 FAILFUNC=__x64_sys_read
 echo $FAILFUNC > /sys/kernel/debug/$FAILTYPE/inject
-echo -1 > /sys/kernel/debug/$FAILTYPE/$FAILFUNC/retval
+echo 100 > /sys/kernel/debug/$FAILTYPE/$FAILFUNC/retval
 echo Y > /sys/kernel/debug/$FAILTYPE/task-filter
 echo 100 > /sys/kernel/debug/$FAILTYPE/probability
 echo 0 > /sys/kernel/debug/$FAILTYPE/interval
-echo 999 > /sys/kernel/debug/$FAILTYPE/times
+echo 9999999999999999999 > /sys/kernel/debug/$FAILTYPE/times
 echo 0 > /sys/kernel/debug/$FAILTYPE/space
 echo 1 > /sys/kernel/debug/$FAILTYPE/verbose
 
