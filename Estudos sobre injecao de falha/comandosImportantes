@@ -1,0 +1,2 @@
+journalctl -b | grep gedit -> syslog do sistema sobre a aplicacao
+dmesg -> mensgens captadas do kernel

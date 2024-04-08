@@ -20,7 +20,7 @@ echo 100 > /sys/kernel/debug/$FAILTYPE/probability
 echo 0 > /sys/kernel/debug/$FAILTYPE/interval
 echo 9999999999999999999 > /sys/kernel/debug/$FAILTYPE/times
 echo 0 > /sys/kernel/debug/$FAILTYPE/space
-echo 1 > /sys/kernel/debug/$FAILTYPE/verbose
+echo 0 > /sys/kernel/debug/$FAILTYPE/verbose
 
 #read -p "Digite o PID do processo que sera impactado pela injecao: " pid
 #command="echo 1 | sudo tee /proc/$pid/make-it-fail"
