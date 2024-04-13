@@ -1,2 +1,4 @@
 journalctl -b | grep gedit -> syslog do sistema sobre a aplicacao
 dmesg -> mensgens captadas do kernel
+ps aux | grep "appname"
+echo 1 | sudo tee /proc/[pid]/make-it-fail
