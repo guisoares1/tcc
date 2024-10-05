@@ -2,3 +2,11 @@ journalctl -b | grep gedit -> syslog do sistema sobre a aplicacao
 dmesg -> mensgens captadas do kernel
 ps aux | grep "appname"
 echo 1 | sudo tee /proc/[pid]/make-it-fail
+
+sudo trace-cmd record -e function -P <PID>
+sudo trace-cmd report | grep 5344
+
+pidof firefox
+
+
+
