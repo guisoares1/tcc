@@ -18,7 +18,7 @@ echo 100 > /sys/kernel/debug/$FAILTYPE/$FAILFUNC/retval
 echo Y > /sys/kernel/debug/$FAILTYPE/task-filter
 echo 100 > /sys/kernel/debug/$FAILTYPE/probability
 echo 0 > /sys/kernel/debug/$FAILTYPE/interval
-echo 9999999999999999999 > /sys/kernel/debug/$FAILTYPE/times
+echo 9999999999999999 > /sys/kernel/debug/$FAILTYPE/times
 echo 0 > /sys/kernel/debug/$FAILTYPE/space
 echo 0 > /sys/kernel/debug/$FAILTYPE/verbose
 

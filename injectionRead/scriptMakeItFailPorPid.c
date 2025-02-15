@@ -10,7 +10,7 @@
 int main() {
     char appname[100];
     printf("Digite o nome do aplicativo: ");
-    scanf("%s", appname);
+    scanf("%99s", appname); // Limita o input para evitar overflow
 
     // Obtém o PID do processo principal
     char command[200];
@@ -29,76 +29,72 @@ int main() {
     }
     pclose(fp);
     
-    printf("PID %d\n",main_pid);
+    printf("PID %d\n", main_pid);
 
-    char buffer_size[20];
-    sprintf(buffer_size, "%d", 250);  // Definido para 250 KB
-
-   // Desliga o tracing e limpa o buffer
+    // Configuração do tracing
     system("echo 0 > /sys/kernel/debug/tracing/tracing_on");
     system("echo > /sys/kernel/debug/tracing/trace");
-
-    // Define o tracer como "function" (chamadas de função)
     system("echo function > /sys/kernel/debug/tracing/current_tracer");
 
-    // Define o tamanho do buffer circular
-    char buffer_command[1000];
-    sprintf(buffer_command, "echo %s > /sys/kernel/debug/tracing/buffer_size_kb", buffer_size);
+    // Define tamanho do buffer (250 KB)
+    char buffer_command[100];
+    snprintf(buffer_command, sizeof(buffer_command), 
+             "echo 250 > /sys/kernel/debug/tracing/buffer_size_kb");
     system(buffer_command);
 
-    // Define o PID do processo a ser monitorado
+    // Define PID para monitoramento
     char pid_command[100];
-    sprintf(pid_command, "echo %d > /sys/kernel/debug/tracing/set_ftrace_pid", main_pid);
+    snprintf(pid_command, sizeof(pid_command),
+             "echo %d > /sys/kernel/debug/tracing/set_ftrace_pid", main_pid);
     system(pid_command);
 
-    // Ativa o tracing
     system("echo 1 > /sys/kernel/debug/tracing/tracing_on");
     
-    char tipoInjecao[1];
+    // Verifica se deseja injetar em todos os PIDs
+    char tipoInjecao[2]; // Buffer corrigido para 1 caractere + '\0'
     printf("Deseja injetar em todos os pids do app? (1 - Sim/ 2 - Nao) ");
-    scanf("%s", tipoInjecao);
-    if (tipoInjecao == "1"){
-      // Obtém todos os PIDs da aplicação
-      sprintf(command, "pgrep %s", appname);
-      fp = popen(command, "r");
-      if (fp == NULL) {
-          printf("Erro ao obter os PIDs da aplicação.\n");
-          return 1;
-      }
+    scanf("%1s", tipoInjecao); // Limita a 1 caractere
+    
+    if (strcmp(tipoInjecao, "1") == 0) { // Comparação correta
+        sprintf(command, "pgrep %s", appname);
+        fp = popen(command, "r");
+        if (fp == NULL) {
+            printf("Erro ao obter os PIDs da aplicação.\n");
+            return 1;
+        }
 
-      // Injetar a falha em todos os PIDs
-      int pid;
-      while (fscanf(fp, "%d", &pid) == 1) {
-          char fail_command[100];
-          sprintf(fail_command, "echo 1 | sudo tee /proc/%d/make-it-fail", pid);
-          system(fail_command);
-      }
-      pclose(fp);
-    }else{
-      char fail_command[100];
-      sprintf(fail_command, "echo 1 | sudo tee /proc/%d/make-it-fail", main_pid);
-      system(fail_command);
+        int pid;
+        while (fscanf(fp, "%d", &pid) == 1) {
+            char fail_command[100];
+            snprintf(fail_command, sizeof(fail_command),
+                     "echo 1 | sudo tee /proc/%d/make-it-fail", pid);
+            system(fail_command);
+        }
+        pclose(fp);
+    } else {
+        char fail_command[100];
+        snprintf(fail_command, sizeof(fail_command),
+                 "echo 1 | sudo tee /proc/%d/make-it-fail", main_pid);
+        system(fail_command);
     }
 
-    // Aguarda a aplicação finalizar
+    // Aguarda o processo finalizar
     while (kill(main_pid, 0) == 0) {
         sleep(1);
     }
-    // Move o conteúdo do buffer de trace para o arquivo de saída na pasta atual
-    char output_file[100];
-    sprintf(output_file, "trace_%s.txt", appname);  
+
+    // Salva o trace em um arquivo
+    char output_file[150]; // Tamanho aumentado para evitar overflow
+    snprintf(output_file, sizeof(output_file), "trace_%s.txt", appname);
     char move_command[200];
-    sprintf(move_command, "cat /sys/kernel/debug/tracing/trace > %s", output_file);
+    snprintf(move_command, sizeof(move_command),
+             "cat /sys/kernel/debug/tracing/trace > %s", output_file);
     system(move_command);
     
     system("echo 0 > /sys/kernel/debug/tracing/tracing_on");
     
-    // Exibe uma mensagem ao final da execução
     printf("Trace gravado no arquivo %s\n", output_file);
-  
-
     printf("Rastreamento do processo %d e seus filhos concluído.\n", main_pid);
-
 
     return 0;
 }
